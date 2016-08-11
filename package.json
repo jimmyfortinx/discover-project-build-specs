@@ -1,0 +1,32 @@
+{
+  "name": "discover-project-build-specs",
+  "version": "0.0.0",
+  "description": "Analyses a project structure and files to returns all build specs. Typescript need is an example of build spec.",
+  "main": "dist/discover-project-build-specs.js",
+  "scripts": {
+    "postinstall": "typings install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimmyfortinx/discover-project-build-specs.git"
+  },
+  "author": "Jimmy Fortin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jimmyfortinx/discover-project-build-specs/issues"
+  },
+  "homepage": "https://github.com/jimmyfortinx/discover-project-build-specs#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-jasmine": "^2.4.0",
+    "gulp-typescript": "^2.13.6",
+    "jasmine-core": "^2.4.1",
+    "proxyquire": "^1.7.10",
+    "typescript": "^1.8.10"
+  },
+  "dependencies": {
+    "lodash": "^4.14.2",
+    "minimatch": "^3.0.3",
+    "node-dir": "^0.1.15"
+  }
+}
