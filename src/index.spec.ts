@@ -21,95 +21,172 @@ describe("Lib", () => {
         it("returns an empty specs file when no files", done => {
             var projectFiles = [];
 
-            var expectedSpecs = {
-                typescript: {
-                    configs: [],
-                    src: [],
-                    required: false
-                }
+            var expectedPackageSpecs: Lib.ProjectBuildPackageSpecs = {
+                npm: {
+                    file: null,
+                    missing: true
+                },
+                files: []
             };
 
             projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
 
             lib.getSpecs()
                 .then(specs => {
-                    expect(specs).toEqual(expectedSpecs);
+                    expect(specs.packages.length).toBe(1);
+                    expect(specs.packages[0]).toEqual(expectedPackageSpecs);
                     done();
                 });
         });
 
-        it("returns all typescript configuration files found", done => {
+        it("list all packages", done => {
             var projectFiles = [
-                "test.ts",
-                "tsconfig.json",
-                "client/tsconfig.json",
-                "client/test.ts"
+                "client/package.json",
+                "server/package.json"
             ];
 
-            var expectedConfigs = [
-                "tsconfig.json",
-                "client/tsconfig.json"
+            var expectedPackagesSpecs: Lib.ProjectBuildPackageSpecs[] = [
+                {
+                    npm: {
+                        file: "client/package.json",
+                        missing: false
+                    },
+                    files: [
+                        "client/package.json"
+                    ]
+                },
+                {
+                    npm: {
+                        file: "server/package.json",
+                        missing: false
+                    },
+                    files: [
+                        "server/package.json"
+                    ]
+                }
             ];
 
             projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
 
             lib.getSpecs()
                 .then(specs => {
-                    expect(specs.typescript.configs).toEqual(expectedConfigs);
+                    expect(specs.packages).toEqual(expectedPackagesSpecs);
                     done();
                 });
         });
 
-        it("requires typescript if typescript files are found", done => {
-            var projectFiles = [
-                "tsconfig.json",
-                "client/tsconfig.json"
-            ];
+        describe("typescript", () => {
+            it("returns all typescript configuration files found", done => {
+                var projectFiles = [
+                    "test.ts",
+                    "tsconfig.json",
+                    "client/tsconfig.json",
+                    "client/test.ts"
+                ];
 
-            projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+                var expectedConfigs = [
+                    "tsconfig.json",
+                    "client/tsconfig.json"
+                ];
 
-            lib.getSpecs()
-                .then(specs => {
-                    expect(specs.typescript.required).toEqual(true);
-                    done();
-                });
+                projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+
+                lib.getSpecs()
+                    .then(specs => {
+                        expect(specs.packages.length).toBe(1);
+                        expect(specs.packages[0].typescript.configs).toEqual(expectedConfigs);
+                        done();
+                    });
+            });
+
+            it("returns all typescript files found", done => {
+                var projectFiles = [
+                    "test.ts",
+                    "tsconfig.json",
+                    "client/tsconfig.json",
+                    "client/test.ts"
+                ];
+
+                var expectedFiles = [
+                    "test.ts",
+                    "client/test.ts"
+                ];
+
+                projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+
+                lib.getSpecs()
+                    .then(specs => {
+                        expect(specs.packages.length).toBe(1);
+                        expect(specs.packages[0].typescript.files).toEqual(expectedFiles);
+                        done();
+                    });
+            });
+
+            it("returns the typings file found", done => {
+                var projectFiles = [
+                    "test.ts",
+                    "tsconfig.json",
+                    "typings.json",
+                    "client/tsconfig.json",
+                    "client/test.ts"
+                ];
+
+                var expectedFile = "typings.json";
+
+                projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+
+                lib.getSpecs()
+                    .then(specs => {
+                        expect(specs.packages.length).toBe(1);
+                        expect(specs.packages[0].typescript.typingsConfig).toEqual(expectedFile);
+                        done();
+                    });
+            });
+
+            it("returns null in typings file when not found", done => {
+                var projectFiles = [
+                    "test.ts",
+                    "tsconfig.json",
+                    "client/tsconfig.json",
+                    "client/test.ts"
+                ];
+
+                var expectedFile = null;
+
+                projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+
+                lib.getSpecs()
+                    .then(specs => {
+                        expect(specs.packages.length).toBe(1);
+                        expect(specs.packages[0].typescript.typingsConfig).toEqual(expectedFile);
+                        done();
+                    });
+            });
         });
 
-        it("returns all typescript files found", done => {
-            var projectFiles = [
-                "test.ts",
-                "tsconfig.json",
-                "client/tsconfig.json",
-                "client/test.ts"
-            ];
+        describe("unitTests", () => {
+            it("returns all spec files found", done => {
+                var projectFiles = [
+                    "test.spec.ts",
+                    "tsconfig.json",
+                    "client/tsconfig.json",
+                    "client/test.spec.js"
+                ];
 
-            var expectedSrc = [
-                "test.ts",
-                "client/test.ts"
-            ];
+                var expectedFiles = [
+                    "test.spec.ts",
+                    "client/test.spec.js"
+                ];
 
-            projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
+                projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
 
-            lib.getSpecs()
-                .then(specs => {
-                    expect(specs.typescript.src).toEqual(expectedSrc);
-                    done();
-                });
-        });
-
-        it("requires typescript if typescript files are found", done => {
-            var projectFiles = [
-                "test.ts",
-                "client/test.ts"
-            ];
-
-            projectMock.listAllFiles.and.returnValue(Promise.resolve(projectFiles));
-
-            lib.getSpecs()
-                .then(specs => {
-                    expect(specs.typescript.required).toEqual(true);
-                    done();
-                });
+                lib.getSpecs()
+                    .then(specs => {
+                    expect(specs.packages.length).toBe(1);
+                        expect(specs.packages[0].unitTests.files).toEqual(expectedFiles);
+                        done();
+                    });
+            });
         });
     });
 });
